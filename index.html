@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GST Billing System</title>
+    <title>Reverse GST Billing System</title>
     <style>
         * {
             margin: 0;
@@ -47,6 +47,13 @@
             color: #555;
             font-weight: 600;
             font-size: 16px;
+        }
+
+        .label-hint {
+            font-size: 13px;
+            color: #888;
+            font-weight: 400;
+            margin-left: 5px;
         }
 
         input {
@@ -183,11 +190,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>🧾 GST Billing System</h1>
+        <h1>🧾 Reverse GST Calculator</h1>
         
         <div class="input-section">
-            <label for="unitPrice">Unit Price (₹)</label>
-            <input type="number" id="unitPrice" placeholder="Enter unit price" min="0" step="0.01">
+            <label for="grandTotal">
+                Grand Total (₹)
+                <span class="label-hint">(GST-inclusive amount)</span>
+            </label>
+            <input type="number" id="grandTotal" placeholder="Enter grand total" min="0" step="0.01">
         </div>
 
         <button onclick="generateBill()">Generate Bill</button>
@@ -207,12 +217,8 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Unit Price</td>
-                        <td id="displayUnitPrice">0.00</td>
-                    </tr>
-                    <tr>
-                        <td>Amount</td>
-                        <td id="displayAmount">0.00</td>
+                        <td>Base Amount</td>
+                        <td id="displayBaseAmount">0.00</td>
                     </tr>
                     <tr>
                         <td>CGST (9%)</td>
@@ -230,29 +236,29 @@
             </table>
 
             <div class="gst-note">
-                GST @ 18% (CGST: 9% + SGST: 9%)
+                GST @ 18% (CGST: 9% + SGST: 9%) - Reverse Calculated
             </div>
         </div>
     </div>
 
     <script>
         function generateBill() {
-            const unitPrice = parseFloat(document.getElementById('unitPrice').value);
+            const grandTotal = parseFloat(document.getElementById('grandTotal').value);
 
-            if (isNaN(unitPrice) || unitPrice <= 0) {
-                alert('Please enter a valid unit price');
+            if (isNaN(grandTotal) || grandTotal <= 0) {
+                alert('Please enter a valid grand total');
                 return;
             }
 
-            // Calculate values
-            const amount = unitPrice;
-            const cgst = amount * 0.09;
-            const sgst = amount * 0.09;
-            const grandTotal = amount + cgst + sgst;
+            // Reverse GST Calculation
+            // Formula: Base Amount = Grand Total ÷ 1.18
+            const baseAmount = grandTotal / 1.18;
+            const totalGST = grandTotal - baseAmount;
+            const cgst = totalGST / 2;  // 9%
+            const sgst = totalGST / 2;  // 9%
 
             // Display values
-            document.getElementById('displayUnitPrice').textContent = unitPrice.toFixed(2);
-            document.getElementById('displayAmount').textContent = amount.toFixed(2);
+            document.getElementById('displayBaseAmount').textContent = baseAmount.toFixed(2);
             document.getElementById('displayCGST').textContent = cgst.toFixed(2);
             document.getElementById('displaySGST').textContent = sgst.toFixed(2);
             document.getElementById('displayGrandTotal').textContent = grandTotal.toFixed(2);
@@ -268,16 +274,15 @@
             });
             document.getElementById('billDate').textContent = dateStr;
 
-            // Show bil
+            // Show bill
             document.getElementById('billContainer').classList.add('show');
         }
 
-        // Allow Enter key to generate bill
-        document.getElementById('unitPrice').addEventListener('keypress', function(e) {
+        // Allow Enter key to generate bill and hide keyboard
+        document.getElementById('grandTotal').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 generateBill();
-                // Hide keyboard by removing focus
-                this.blur();
+                this.blur();  // Hide keyboard
             }
         });
     </script>
